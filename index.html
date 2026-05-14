@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KSB CNC Perfil v2.3 PWA</title>
+<style>
+/* ── CSS VARIABLES (temas) ─────────────────────────────── */
+:root {
+  --bg:#07111d; --cbg:#0b1826; --bdr:#1c3f60;
+  --txt:#d7eaff; --dim:#7fa2c4; --mono:#7ac4f0;
+  --inp:#06101d; --itxt:#f4fbff; --svbg:#040c18;
+  --hdr1:#005fa8; --hdr2:#002d5a;
+  --tb-bg:#081522; --tb-act:#0d2742;
+  --rb-hi-bg:#08213a; --rb-hi-b:#0074c8;
+  --rb-ye-bg:#241900; --rb-ye-b:#bd8500;
+  --rb-gn-bg:#082412; --rb-gn-b:#258b4b;
+  --gc-txt:#9ddcff;
+  --g-ln:#0d1f30; --g-tx:#1a4060; --g-ax:#1a4a6a;
+  --bl:#0074c8; --bll:#55c7ff; --grn:#4bea91; --yel:#ffd45a;
+  --shadow:0 10px 28px rgba(0,0,0,.22);
+}
+body.t-gr {
+  --bg:#1c1c1c; --cbg:#252525; --bdr:#3a3a3a;
+  --txt:#d0d0d0; --dim:#777777; --mono:#a0c0e0;
+  --inp:#141414; --itxt:#e0e0e0; --svbg:#111111;
+  --hdr1:#2d2d2d; --hdr2:#1a1a1a;
+  --tb-bg:#1a1a1a; --tb-act:#252535;
+  --rb-hi-bg:#1a2030; --rb-hi-b:#0055a0;
+  --rb-ye-bg:#2a2010; --rb-ye-b:#6a5010;
+  --rb-gn-bg:#1a2a1a; --rb-gn-b:#3a5a3a;
+  --gc-txt:#90b8d8;
+  --g-ln:#2a2a2a; --g-tx:#555555; --g-ax:#3a3a5a;
+}
+body.t-lt {
+  --bg:#e8eef6; --cbg:#ffffff; --bdr:#9db5cf;
+  --txt:#0b1f33; --dim:#365a7d; --mono:#003f8f;
+  --inp:#f7fbff; --itxt:#06192b; --svbg:#f8fbff;
+  --hdr1:#0067b8; --hdr2:#003f78;
+  --tb-bg:#d7e4f2; --tb-act:#ffffff;
+  --rb-hi-bg:#e5f1ff; --rb-hi-b:#0067b8;
+  --rb-ye-bg:#fff4d6; --rb-ye-b:#b67800;
+  --rb-gn-bg:#def7e8; --rb-gn-b:#25864a;
+  --gc-txt:#003f8f;
+  --g-ln:#b7c9dc; --g-tx:#365a7d; --g-ax:#7aa9cb;
+  --bl:#0067b8; --bll:#004f99; --grn:#176834; --yel:#835800;
+  --shadow:0 10px 26px rgba(15,50,90,.12);
+}
+/* ── RESET ─────────────────────────────────────────────── */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;background:var(--bg);color:var(--txt);font-family:'Segoe UI',Arial,sans-serif;font-size:14px;-webkit-font-smoothing:antialiased}
+/* ── HEADER ─────────────────────────────────────────────── */
+.hdr{background:linear-gradient(135deg,var(--hdr1),var(--hdr2));padding:12px 18px;display:flex;align-items:center;gap:12px;border-bottom:2px solid var(--bl);box-shadow:var(--shadow);position:sticky;top:0;z-index:20}
+.hdr-t{font-size:15px;font-weight:800;color:#fff;letter-spacing:.8px}
+.hdr-s{font-size:10px;color:#cfe8ff;opacity:.9}
+/* THEME BUTTONS */
+.thm-btn{width:20px;height:20px;border-radius:4px;cursor:pointer;border:2px solid transparent;flex-shrink:0;transition:border-color .15s}
+.thm-btn:hover,.thm-btn.on{border-color:#fff}
+/* ── TABS ─────────────────────────────────────────────── */
+.tabs{display:flex;background:var(--tb-bg);border-bottom:1px solid var(--bdr);padding:0 12px;overflow-x:auto;position:sticky;top:54px;z-index:19;box-shadow:0 8px 18px rgba(0,0,0,.08)}
+.tab{padding:11px 15px;cursor:pointer;font-size:12px;color:var(--dim);border:none;border-bottom:3px solid transparent;background:none;font-family:inherit;white-space:nowrap;transition:all .15s;font-weight:700}
+.tab:hover{color:var(--txt)}.tab.on{color:var(--bll);border-bottom-color:var(--bl)}
+/* ── LAYOUT ─────────────────────────────────────────────── */
+.panels{padding:14px;max-width:1440px;margin:0 auto}
+.panel{display:none}.panel.on{display:block}
+.g2{display:grid;grid-template-columns:minmax(340px,.92fr) minmax(380px,1.08fr);gap:14px;align-items:start}
+/* ── CARDS ─────────────────────────────────────────────── */
+.card{background:var(--cbg);border:1px solid var(--bdr);border-radius:14px;padding:13px 14px;margin-bottom:12px;box-shadow:var(--shadow)}
+.ct{color:var(--bll);font-size:11px;font-weight:800;letter-spacing:.8px;margin-bottom:9px;text-transform:uppercase}
+/* ── FORM ─────────────────────────────────────────────── */
+.fr{display:flex;align-items:center;gap:9px;margin-bottom:8px}
+.fl{font-size:12px;color:var(--dim);min-width:132px;flex-shrink:0;font-weight:700}
+input[type=number],input[type=text],select{background:var(--inp);color:var(--itxt);border:1.5px solid var(--bdr);border-radius:9px;padding:8px 10px;font-family:'Consolas','Courier New',monospace;font-size:14px;outline:none;font-weight:700;min-height:36px}
+input[type=number]{width:102px;text-align:right}
+select{min-width:190px}
+input:focus,select:focus{border-color:var(--bl);box-shadow:0 0 0 3px color-mix(in srgb,var(--bl) 18%,transparent)}
+.ir{color:var(--bll)}
+input[type=range]{width:150px;accent-color:var(--bl);cursor:pointer}
+/* ── BUTTONS ─────────────────────────────────────────────── */
+.btn-calc{width:100%;padding:12px;font-size:14px;font-weight:900;background:linear-gradient(135deg,var(--bl),var(--hdr2));color:#fff;border:none;border-radius:12px;cursor:pointer;font-family:inherit;margin-top:8px;letter-spacing:.6px;box-shadow:0 8px 20px rgba(0,103,184,.28)}
+.btn-calc:hover{filter:brightness(1.2)}
+.btn-sm{background:var(--rb-hi-bg);color:var(--bll);border:1px solid var(--bdr);border-radius:9px;padding:7px 11px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:800}
+.btn-sm:hover{filter:brightness(1.3)}
+.btn-add{background:var(--bl);color:#fff;border:none;border-radius:9px;padding:7px 11px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:800;opacity:.92}
+.btn-add:hover{opacity:1}
+.btn-del{background:none;border:1px solid var(--bdr);color:#884433;border-radius:3px;padding:1px 5px;cursor:pointer;font-family:inherit;font-size:10px}
+.btn-cp{background:var(--bl);color:#fff;border:none;border-radius:8px;padding:6px 10px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:800;opacity:.9}
+.btn-cp:hover{opacity:1}
+.btn-auto{background:#005a28;color:#7dffad;border:1px solid #2d8a50;border-radius:11px;padding:10px 13px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:900;flex:1}
+body.t-lt .btn-auto{background:#d0ead8;color:#226633;border-color:#4a9a5a}
+.btn-auto:hover{filter:brightness(1.2)}
+/* ── RESULT BOXES ─────────────────────────────────────────── */
+.rb{background:var(--cbg);border:1.5px solid var(--bdr);border-radius:13px;padding:12px 13px;box-shadow:0 8px 20px rgba(0,0,0,.08)}
+.rb.hi{background:var(--rb-hi-bg);border-color:var(--rb-hi-b)}
+.rb.ye{background:var(--rb-ye-bg);border-color:var(--rb-ye-b)}
+.rb.gn{background:var(--rb-gn-bg);border-color:var(--rb-gn-b)}
+.rl{font-size:10px;color:var(--dim);margin-bottom:4px;text-transform:uppercase;letter-spacing:.6px;font-weight:900}
+.rv{font-size:20px;font-weight:900;color:var(--txt);line-height:1.18;font-family:'Consolas','Courier New',monospace;letter-spacing:-.3px}
+.rv.b{color:var(--bll)}.rv.y{color:var(--yel)}.rv.g{color:var(--grn)}
+/* ── TABLE ─────────────────────────────────────────────── */
+.pt{width:100%;border-collapse:separate;border-spacing:0;font-size:12px}
+.pt th{background:var(--inp);color:var(--dim);padding:8px 7px;text-align:left;border-bottom:1px solid var(--bdr);font-size:11px;white-space:nowrap;font-weight:900}
+.pt td{padding:6px 5px;border-bottom:1px solid var(--bdr);vertical-align:middle}
+.pt tr:nth-child(even) td{background:var(--inp)}
+.pt tr.arc td{background:var(--rb-hi-bg)}
+.pt input{width:62px;font-size:11px;padding:2px 4px}
+.pt select{font-size:10px;padding:2px 3px;min-width:unset}
+/* ── G-CODE ─────────────────────────────────────────────── */
+.gc{background:var(--svbg);border:1.5px solid var(--bdr);border-radius:12px;padding:12px;font-size:13px;color:var(--gc-txt);white-space:pre;overflow-x:auto;max-height:230px;overflow-y:auto;line-height:1.75;font-family:'Consolas','Courier New',monospace;font-weight:800}
+/* ── SVG ─────────────────────────────────────────────── */
+svg{display:block;width:100%;background:var(--svbg);border-radius:13px;border:1.5px solid var(--bdr);cursor:crosshair;min-height:260px}
+.coords{font-size:12px;color:var(--dim);margin-top:6px;font-family:'Consolas','Courier New',monospace;height:18px;font-weight:800}
+.leg{font-size:9px;color:var(--dim);display:flex;gap:10px;flex-wrap:wrap;margin-top:3px}
+/* ── STATUS BAR ─────────────────────────────────────────── */
+.sbar{border-radius:5px;padding:8px 12px;font-size:12px;font-weight:700;text-align:center;margin-bottom:8px;transition:all .3s}
+.sbar.ok{background:var(--rb-gn-bg);color:#44dd88;border:1px solid var(--rb-gn-b)}
+.sbar.bad{background:#2a0808;color:#ff5544;border:1px solid #5c1a1a}
+.sbar.warn{background:var(--rb-ye-bg);color:var(--yel);border:1px solid var(--rb-ye-b)}
+body.t-lt .sbar.bad{background:#ffe8e8;color:#cc2222;border-color:#cc2222}
+/* ── INFO BOX ─────────────────────────────────────────── */
+.info{background:var(--rb-hi-bg);border:1px solid var(--rb-hi-b);border-radius:11px;padding:8px 11px;font-size:12px;color:var(--txt);margin-bottom:12px;line-height:1.45;opacity:.9}
+/* ── MANUAL ─────────────────────────────────────────────── */
+.mh{color:var(--bll);font-size:12px;font-weight:700;margin-bottom:5px;padding-bottom:3px;border-bottom:1px solid var(--bdr)}
+.mp{font-size:11px;color:var(--txt);line-height:1.8;margin-bottom:5px;opacity:.85}
+.mc{background:var(--svbg);border:1px solid var(--bdr);border-radius:4px;padding:6px 9px;font-size:11px;color:var(--gc-txt);font-family:'Courier New',monospace;line-height:1.8;margin:3px 0 7px}
+.mk{color:var(--yel);font-weight:700}
+.mg{color:var(--grn)}
+.mt{width:100%;border-collapse:collapse;font-size:11px;margin:5px 0}
+.mt th{background:var(--inp);color:var(--dim);padding:5px 7px;text-align:left;border:1px solid var(--bdr);font-size:10px}
+.mt td{padding:4px 7px;border:1px solid var(--bdr);color:var(--txt);opacity:.85;vertical-align:top}
+/* ── MODE SELECTOR ─────────────────────────────────────── */
+.msw{display:flex;gap:0;margin-bottom:12px;border:1.5px solid var(--bdr);border-radius:12px;overflow:hidden;width:fit-content;background:var(--inp);box-shadow:var(--shadow)}
+.msw button{padding:10px 16px;font-size:12px;font-family:inherit;border:none;cursor:pointer;transition:all .15s;background:var(--inp);color:var(--dim);font-weight:800}
+.msw button.on{background:var(--rb-hi-bg);color:var(--bll);font-weight:700}
+/* ── FOOTER ─────────────────────────────────────────────── */
+.ftr{text-align:center;padding:12px 0;font-size:10px;color:var(--dim);border-top:1px solid var(--bdr);margin-top:12px;font-weight:700}
+.ftr-actions{display:flex;justify-content:center;margin-bottom:10px}
+.btn-improve{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 16px;border-radius:12px;text-decoration:none;font-weight:800;background:var(--rb-hi-bg);color:var(--bll);border:1px solid var(--rb-hi-b);box-shadow:0 6px 18px rgba(0,0,0,.12);transition:transform .18s,filter .18s,border-color .18s}
+.btn-improve:hover{transform:translateY(-1px);filter:brightness(1.08);border-color:var(--bll)}
+.btn-improve:active{transform:translateY(0)}
+.pwa-install{position:fixed;right:14px;bottom:14px;z-index:50;display:none;align-items:center;gap:7px;padding:10px 14px;border-radius:14px;border:1px solid var(--rb-hi-b);background:var(--rb-hi-bg);color:var(--bll);font-family:inherit;font-weight:800;box-shadow:0 10px 30px rgba(0,0,0,.2);cursor:pointer}
+.pwa-install.show{display:inline-flex}
+@media(max-width:760px){.pwa-install{left:12px;right:12px;bottom:10px;justify-content:center}.ftr{padding-bottom:64px}.btn-improve{width:100%;max-width:260px}}
+
+
+/* ── UX V2.2 — contraste, celular e chão de fábrica ───────── */
+body.t-lt .card{border-color:#8fb0cf}
+body.t-lt .rb{background:#fff;border-color:#86aaca}
+body.t-lt .tab.on{background:#fff}
+body.t-lt .hdr-s{color:#dcefff}
+body.t-lt .thm-btn:hover,body.t-lt .thm-btn.on{border-color:#07385f;box-shadow:0 0 0 2px rgba(255,255,255,.65)}
+.ir,input.ir{color:var(--bll)!important}
+#toast{position:fixed;right:18px;bottom:18px;background:var(--txt);color:var(--bg);padding:10px 14px;border-radius:12px;font-weight:900;font-size:13px;box-shadow:var(--shadow);opacity:0;transform:translateY(10px);pointer-events:none;transition:.2s;z-index:50}
+#toast.show{opacity:1;transform:translateY(0)}
+@media (max-width:980px){
+  .g2{grid-template-columns:1fr}
+  .tabs{top:56px}
+  .msw{width:100%}.msw button{flex:1}
+}
+@media (max-width:640px){
+  html,body{font-size:13px}
+  .hdr{padding:10px 12px;align-items:flex-start}.hdr-t{font-size:13px}.hdr-s{font-size:9px}
+  .tabs{top:55px;padding:0 6px}.tab{padding:10px 11px;font-size:11px}
+  .panels{padding:10px}
+  .card{padding:11px;margin-bottom:10px;border-radius:12px}
+  .fr{display:grid;grid-template-columns:1fr;gap:4px;margin-bottom:10px}.fl{min-width:0}
+  input[type=number],input[type=text],select{width:100%;min-width:0;font-size:16px}
+  .rv{font-size:22px}.gc{font-size:12px;max-height:260px}
+  svg{min-height:240px}.msw{display:grid;grid-template-columns:1fr}.msw button{width:100%}
+}
+
+</style>
+
+<!-- PWA / Instalar como app -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0066b3">
+<meta name="application-name" content="CNC Perfil">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CNC Perfil">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+</head>
+<body>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<!-- ── HEADER ──────────────────────────────────────────── -->
+<div class="hdr">
+  <span style="font-size:22px">⚙</span>
+  <div>
+    <div class="hdr-t">KSB BRASIL — CNC PERFIL</div>
+    <div class="hdr-s">Concordância · I/K Fanuc · Usinagem Jundiaí · v2.2</div>
+  </div>
+  <!-- TEMA -->
+  <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
+    <span style="font-size:9px;color:#88b8d8">Tema:</span>
+    <button class="thm-btn on" id="th0" onclick="setTheme('','th0')"   title="Dark Navy"  style="background:#07111d"></button>
+    <button class="thm-btn"    id="th1" onclick="setTheme('gr','th1')" title="Grafite"    style="background:#252525"></button>
+    <button class="thm-btn"    id="th2" onclick="setTheme('lt','th2')" title="Claro Azul" style="background:#edf2f7"></button>
+  </div>
+</div>
+
+<!-- ── TABS ──────────────────────────────────────────── -->
+<div class="tabs">
+  <button class="tab on"  onclick="ST(0,this)">⑴ Calculadora</button>
+  <button class="tab"     onclick="ST(1,this)">⑵ Por Pontos</button>
+  <button class="tab"     onclick="ST(2,this)">⑶ Ajuste Visual</button>
+  <button class="tab"     onclick="ST(3,this)">⑷ Manual / Ajuda</button>
+</div>
+
+<div class="panels">
+
+<!-- ══════════════════ TAB 1 — CALCULADORA ══════════════════ -->
+<div class="panel on" id="P0">
+<div class="msw">
+  <button id="mAb" class="on" onclick="setM('A')">⒜ Pelo Centro (do desenho)</button>
+  <button id="mBb"            onclick="setM('B')">⒝ Pelo Ponto Final + Superfície</button>
+</div>
+<!-- MODO A -->
+<div id="mA">
+<div class="info">Modo A: lê o <strong>∅ e Z do centro</strong> de cada arco do desenho. Calcula S1, T12, E2 e I/K.</div>
+<div class="g2">
+<div>
+  <div class="card">
+    <div class="ct">① Entrada</div>
+    <div class="fr"><span class="fl">Tipo</span><select id="eT" onchange="tE()"><option value="face">Face (Z const.) — vem de −∅</option><option value="diam">Sup. ∅ — vem de −Z</option><option value="pt">Ponto dado</option></select></div>
+    <div class="fr" id="eFR"><span class="fl">Z da face</span><input type="number" id="eZ" value="-19" step="0.001"></div>
+    <div class="fr" id="eDR" style="display:none"><span class="fl">∅ superfície</span><input type="number" id="eD" value="111" step="0.001"></div>
+    <div id="ePR" style="display:none">
+      <div class="fr"><span class="fl">∅ ponto</span><input type="number" id="ePD" value="111" step="0.001"></div>
+      <div class="fr"><span class="fl">Z ponto</span><input type="number" id="ePZ" value="-19" step="0.001"></div>
+    </div>
+  </div>
+  <div class="card" style="border-left:3px solid var(--bl)">
+    <div class="ct">② Arco 1 — centro + R</div>
+    <div class="fr"><span class="fl">∅ centro C1</span><input type="number" id="c1d" value="111" step="0.001" class="ir"></div>
+    <div class="fr"><span class="fl">Z centro C1</span><input type="number" id="c1z" value="58" step="0.001"></div>
+    <div class="fr"><span class="fl">R1 (mm)</span><input type="number" id="r1" value="77" step="0.5" class="ir"></div>
+    <div class="fr"><span class="fl">G</span><select id="g1s"><option value="3">G3 CCW — côncavo</option><option value="2">G2 CW — convexo</option></select></div>
+  </div>
+  <div class="card" style="border-left:3px solid var(--bl)">
+    <div class="ct">③ Arco 2 — centro + R</div>
+    <div class="fr"><span class="fl">∅ centro C2</span><input type="number" id="c2d" value="83.03" step="0.001" class="ir"></div>
+    <div class="fr"><span class="fl">Z centro C2</span><input type="number" id="c2z" value="-12.106" step="0.001"></div>
+    <div class="fr"><span class="fl">R2 (mm)</span><input type="number" id="r2" value="6" step="0.5" class="ir"></div>
+    <div class="fr"><span class="fl">G</span><select id="g2s"><option value="3">G3 CCW — côncavo</option><option value="2">G2 CW — convexo</option></select></div>
+  </div>
+  <div class="card">
+    <div class="ct">④ Saída</div>
+    <div class="fr"><span class="fl">Tipo</span><select id="xT" onchange="tX()"><option value="diam">Sup. ∅ constante</option><option value="face">Face (Z const.)</option><option value="pt">Ponto dado</option></select></div>
+    <div class="fr" id="xDR"><span class="fl">∅ saída</span><input type="number" id="xD" value="71" step="0.001"></div>
+    <div class="fr" id="xFR" style="display:none"><span class="fl">Z saída</span><input type="number" id="xZ" value="-12" step="0.001"></div>
+    <div id="xPR" style="display:none">
+      <div class="fr"><span class="fl">∅ ponto</span><input type="number" id="xPD" value="71"></div>
+      <div class="fr"><span class="fl">Z ponto</span><input type="number" id="xPZ" value="-12.106"></div>
+    </div>
+  </div>
+  <div class="fr"><span class="fl">F (mm/rot)</span><input type="number" id="cF" value="0.15" step="0.01" style="width:68px"></div>
+  <div class="fr"><span class="fl">Offset desb. Z</span><input type="number" id="cZ" value="0.5" step="0.1" style="width:68px"></div>
+  <button class="btn-calc" onclick="calcA()">▶  CALCULAR</button>
+  <div style="margin-top:5px;display:flex;gap:5px">
+    <button class="btn-sm" onclick="ldRotA()">↺ Rotor HD-0184</button>
+    <button class="btn-sm" onclick="clrA()">✕ Limpar</button>
+  </div>
+</div>
+<div>
+  <div class="card"><div class="ct">Resultado</div><div id="aRes"><p style="color:var(--dim)">Preencha →</p></div></div>
+  <div class="card"><div class="ct">Perfil</div>
+    <svg id="aSv" viewBox="0 0 420 270" onmousemove="svgM(event,'aSv','aCb',420,270)" onmouseleave="document.getElementById('aCb').textContent=''"></svg>
+    <div class="coords" id="aCb"></div></div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+      <span class="ct" style="margin:0;color:var(--bll)">ACABAMENTO</span>
+      <div style="display:flex;gap:3px"><button class="btn-cp" onclick="cpEl('aGf')">📋</button><button class="btn-cp" onclick="dlEl('aGf','acab.txt')">⬇</button></div>
+    </div>
+    <div class="gc" id="aGf">—</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:6px 0 3px">
+      <span class="ct" style="margin:0;color:#ff8844">DESBASTE</span><button class="btn-cp" onclick="cpEl('aGd')">📋</button>
+    </div>
+    <div class="gc" id="aGd">—</div>
+  </div>
+</div>
+</div>
+</div><!-- /mA -->
+<!-- MODO B -->
+<div id="mB" style="display:none">
+<div class="info">Modo B: arco tangente a <em>sup. ∅</em> → centro no <strong>mesmo Z</strong> · tangente a <em>face</em> → centro no <strong>mesmo ∅</strong>. Sem precisar do centro no desenho.</div>
+<div class="g2">
+<div>
+  <div class="card">
+    <div class="ct">① S1 — início do arco 1</div>
+    <div class="fr"><span class="fl">∅ em S1</span><input type="number" id="bs1d" value="111" step="0.001" class="ir"></div>
+    <div class="fr"><span class="fl">Z de S1</span><input type="number" id="bs1z" value="-14.5" step="0.001"></div>
+    <div class="fr"><span class="fl">Chegada via</span><select id="bEn"><option value="face_neg">Face (Z const.) — vem de −∅</option><option value="od_neg">Sup. OD — vem de −Z</option><option value="od_pos">Sup. OD — vem de +Z</option></select></div>
+  </div>
+  <div class="card" style="border-left:3px solid var(--bl)">
+    <div class="ct">② Arco 1 — só o raio</div>
+    <div class="fr"><span class="fl">R1</span><input type="number" id="br1" value="80" step="0.5" class="ir"></div>
+    <div class="fr"><span class="fl">G</span><select id="bg1"><option value="3">G3 CCW côncavo</option><option value="2">G2 CW convexo</option></select></div>
+    <div style="font-size:10px;background:var(--inp);border-radius:3px;padding:4px 7px;margin-top:3px;color:var(--dim)">C1 derivado: <span id="bc1d" style="color:var(--bll)">—</span></div>
+  </div>
+  <div class="card" style="border-left:3px solid var(--bl)">
+    <div class="ct">③ Arco 2 — só o raio</div>
+    <div class="fr"><span class="fl">R2</span><input type="number" id="br2" value="5.6" step="0.5" class="ir"></div>
+    <div class="fr"><span class="fl">G</span><select id="bg2"><option value="3">G3 CCW côncavo</option><option value="2">G2 CW convexo</option></select></div>
+    <div style="font-size:10px;background:var(--inp);border-radius:3px;padding:4px 7px;margin-top:3px;color:var(--dim)">C2 derivado: <span id="bc2d" style="color:var(--bll)">—</span></div>
+  </div>
+  <div class="card">
+    <div class="ct">④ E2 — fim do arco 2</div>
+    <div class="fr"><span class="fl">∅ em E2</span><input type="number" id="be2d" value="76" step="0.001" class="ir"></div>
+    <div class="fr"><span class="fl">Z de E2</span><input type="number" id="be2z" value="-10" step="0.001"></div>
+    <div class="fr"><span class="fl">Saída para</span><select id="bEx"><option value="diam_pos">Sup. ∅ — sai +Z (rotor)</option><option value="diam_neg">Sup. ∅ — sai −Z</option><option value="face_neg">Face — sai −∅</option><option value="face_pos">Face — sai +∅</option></select></div>
+  </div>
+  <div class="fr"><span class="fl">F (mm/rot)</span><input type="number" id="bF" value="0.15" step="0.01" style="width:68px"></div>
+  <div class="fr"><span class="fl">Offset desb. Z</span><input type="number" id="bZ" value="0.5" step="0.1" style="width:68px"></div>
+  <button class="btn-calc" onclick="calcB()">▶  CALCULAR — MODO B</button>
+  <div style="margin-top:5px;display:flex;gap:5px">
+    <button class="btn-sm" onclick="ldRotB()">↺ Rotor HD-0184</button>
+    <button class="btn-sm" onclick="ldExB()">↺ ∅76/Z-10</button>
+  </div>
+</div>
+<div>
+  <div class="card"><div class="ct">Resultado</div><div id="bRes"><p style="color:var(--dim)">Preencha →</p></div></div>
+  <div class="card"><div class="ct">Perfil</div>
+    <svg id="bSv" viewBox="0 0 420 270" onmousemove="svgM(event,'bSv','bCb',420,270)" onmouseleave="document.getElementById('bCb').textContent=''"></svg>
+    <div class="coords" id="bCb"></div></div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+      <span class="ct" style="margin:0;color:var(--bll)">ACABAMENTO</span>
+      <div style="display:flex;gap:3px"><button class="btn-cp" onclick="cpEl('bGf')">📋</button><button class="btn-cp" onclick="dlEl('bGf','acab_b.txt')">⬇</button></div>
+    </div>
+    <div class="gc" id="bGf">—</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:6px 0 3px">
+      <span class="ct" style="margin:0;color:#ff8844">DESBASTE</span><button class="btn-cp" onclick="cpEl('bGd')">📋</button>
+    </div>
+    <div class="gc" id="bGd">—</div>
+  </div>
+</div>
+</div>
+</div><!-- /mB -->
+</div><!-- /P0 -->
+
+<!-- ══════════════════ TAB 2 — POR PONTOS ══════════════════ -->
+<div class="panel" id="P1">
+<div class="info">Adicione elementos sequencialmente. <strong>G3 por R</strong> calcula I/K automaticamente pela direção de chegada. <strong>Blend</strong> = concordância em canto (3 pontos + R).</div>
+<div class="g2">
+<div>
+  <div class="card" style="overflow-x:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;flex-wrap:wrap;gap:4px">
+      <span class="ct" style="margin:0">Elementos</span>
+      <div style="display:flex;gap:3px;flex-wrap:wrap">
+        <button class="btn-add" onclick="pA('G1')">+G1</button>
+        <button class="btn-add" onclick="pA('G3R')">+G3 R</button>
+        <button class="btn-add" onclick="pA('G3IK')">+G3 I/K</button>
+        <button class="btn-add" onclick="pA('BLEND')">+Blend</button>
+      </div>
+    </div>
+    <table class="pt" id="pTbl">
+      <thead><tr><th>#</th><th>Tipo</th><th>X∅</th><th>Z</th><th style="min-width:130px">R / I / K</th><th style="color:var(--bll);min-width:115px">Calculado</th><th></th></tr></thead>
+      <tbody id="pTb"></tbody>
+    </table>
+    <div style="margin-top:7px;display:flex;gap:5px;flex-wrap:wrap">
+      <button class="btn-sm" onclick="pLdR()">↺ Rotor</button>
+      <button class="btn-sm" onclick="pLdS()">↺ Passo</button>
+      <button class="btn-sm" onclick="pClr()">✕ Limpar</button>
+    </div>
+  </div>
+  <div class="fr"><span class="fl">F</span><input type="number" id="pF" value="0.15" step="0.01" style="width:68px"></div>
+  <div class="fr"><span class="fl">Offset desb.</span><input type="number" id="pZ" value="0.5" step="0.1" style="width:68px"></div>
+  <div id="pArcC" style="display:none" class="card">
+    <div class="ct">I/K calculados</div>
+    <table class="pt"><thead><tr><th>#</th><th>G</th><th>R nom.</th><th style="color:var(--bll)">I</th><th style="color:var(--bll)">K</th><th>Rv</th><th>✓</th></tr></thead>
+    <tbody id="pArcB"></tbody></table>
+  </div>
+</div>
+<div>
+  <div class="card"><div class="ct">Perfil</div>
+    <svg id="pSv" viewBox="0 0 420 300" onmousemove="svgM(event,'pSv','pCb',420,300)" onmouseleave="document.getElementById('pCb').textContent=''"></svg>
+    <div class="coords" id="pCb"></div>
+    <div class="leg"><span>━G1</span><span style="color:var(--bll)">━G3</span><span style="color:#ff8844">━G2</span><span style="color:var(--grn)">●tang</span></div></div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+      <span class="ct" style="margin:0;color:var(--bll)">ACABAMENTO</span>
+      <div style="display:flex;gap:3px"><button class="btn-cp" onclick="cpEl('pGf')">📋</button><button class="btn-cp" onclick="dlEl('pGf','pontos.txt')">⬇</button></div>
+    </div>
+    <div class="gc" id="pGf">—</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:6px 0 3px">
+      <span class="ct" style="margin:0;color:#ff8844">DESBASTE</span><button class="btn-cp" onclick="cpEl('pGd')">📋</button>
+    </div>
+    <div class="gc" id="pGd">—</div>
+  </div>
+</div>
+</div>
+</div><!-- /P1 -->
+
+<!-- ══════════════════ TAB 3 — AJUSTE VISUAL ══════════════════ -->
+<div class="panel" id="P2">
+<div class="info"><strong>Correria do dia a dia:</strong> Entre com valores aproximados → veja o perfil ao vivo → ajuste os sliders → use <strong>Auto R2</strong> para tangência perfeita automática.</div>
+<div class="g2">
+<div>
+  <div class="card">
+    <div class="ct">Ponto S1 — início</div>
+    <div class="fr"><span class="fl">∅ em S1</span><input type="number" id="vs1d" value="111" step="0.1" oninput="aUpd()"></div>
+    <div class="fr"><span class="fl">Z de S1</span><input type="number" id="vs1z" value="-19" step="0.1" oninput="aUpd()"></div>
+    <div class="fr"><span class="fl">Chegada via</span><select id="vEn" onchange="aUpd()"><option value="face_neg">Face (Z const.) — vem de −∅</option><option value="od_neg">Sup. OD — vem de −Z</option><option value="od_pos">Sup. OD — vem de +Z</option></select></div>
+  </div>
+  <div class="card" style="border-left:3px solid var(--bl)">
+    <div class="ct">Arco 1 — slider R1</div>
+    <div class="fr"><span class="fl">G</span><select id="vg1" onchange="aUpd()"><option value="3">G3 CCW côncavo</option><option value="2">G2 CW convexo</option></select></div>
+    <div style="margin-bottom:5px">
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--dim);margin-bottom:3px"><span>R1 =</span><span id="vr1v" style="color:var(--bll);font-weight:700">77.0 mm</span></div>
+      <div style="display:flex;align-items:center;gap:7px">
+        <input type="range" id="vr1s" min="5" max="200" step="0.5" value="77" oninput="r1S(this.value)">
+        <input type="number" id="vr1n" value="77" step="0.5" style="width:70px" oninput="r1S(this.value)">
+      </div>
+    </div>
+    <div style="font-size:9px;color:var(--dim)">I1 = <span id="vI1" style="color:var(--bll)">—</span> &nbsp; K1 = <span id="vK1" style="color:var(--bll)">—</span></div>
+  </div>
+  <div class="card" style="border-left:3px solid var(--grn)">
+    <div class="ct">Arco 2 — slider R2</div>
+    <div class="fr"><span class="fl">G</span><select id="vg2" onchange="aUpd()"><option value="3">G3 CCW côncavo</option><option value="2">G2 CW convexo</option></select></div>
+    <div style="margin-bottom:5px">
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--dim);margin-bottom:3px"><span>R2 =</span><span id="vr2v" style="color:var(--grn);font-weight:700">6.0 mm</span></div>
+      <div style="display:flex;align-items:center;gap:7px">
+        <input type="range" id="vr2s" min="0.5" max="60" step="0.1" value="6" oninput="r2S(this.value)">
+        <input type="number" id="vr2n" value="6" step="0.1" style="width:70px" oninput="r2S(this.value)">
+      </div>
+    </div>
+    <div style="font-size:9px;color:var(--dim)">I2 = <span id="vI2" style="color:var(--grn)">—</span> &nbsp; K2 = <span id="vK2" style="color:var(--grn)">—</span></div>
+  </div>
+  <div class="card">
+    <div class="ct">Ponto E2 — fim</div>
+    <div class="fr"><span class="fl">∅ em E2</span><input type="number" id="ve2d" value="71" step="0.1" oninput="aUpd()"></div>
+    <div class="fr"><span class="fl">Z de E2</span><input type="number" id="ve2z" value="-12.106" step="0.1" oninput="aUpd()"></div>
+    <div class="fr"><span class="fl">Saída para</span><select id="vEx" onchange="aUpd()"><option value="diam_pos">Sup. ∅ — sai +Z (rotor)</option><option value="diam_neg">Sup. ∅ — sai −Z</option><option value="face_neg">Face — sai −∅</option><option value="face_pos">Face — sai +∅</option></select></div>
+  </div>
+  <!-- STATUS -->
+  <div id="vSb" class="sbar warn">Ajuste os sliders →</div>
+  <!-- BARRA DE ERRO -->
+  <div class="card" style="padding:8px 11px;margin-bottom:8px">
+    <div style="font-size:9px;color:var(--dim);display:flex;justify-content:space-between;margin-bottom:4px"><span>🔴 GAP grande</span><span style="color:var(--grn)">🟢 TANGENTE</span></div>
+    <div style="background:var(--inp);border-radius:4px;height:14px;overflow:hidden">
+      <div id="vGB" style="height:100%;width:0%;background:#dd4444;transition:width .25s,background .25s;border-radius:4px"></div>
+    </div>
+  </div>
+  <!-- AUTO -->
+  <div style="display:flex;gap:6px;margin-bottom:7px">
+    <button class="btn-auto" onclick="autoR2()">⚡ Auto R2</button>
+    <button class="btn-auto" onclick="autoR1()">⚡ Auto R1</button>
+  </div>
+  <div style="display:flex;gap:5px;margin-bottom:7px;flex-wrap:wrap">
+    <button class="btn-sm" onclick="aLdR()">↺ Rotor HD-0184</button>
+    <button class="btn-sm" onclick="aLdE()">↺ ∅76/Z-10</button>
+  </div>
+  <div class="card" id="vResC"><div class="ct">Pontos e I/K</div><div id="vResD"><p style="color:var(--dim)">Ajuste →</p></div></div>
+  <div class="fr"><span class="fl">F (mm/rot)</span><input type="number" id="vF" value="0.15" step="0.01" style="width:68px" oninput="aUpd()"></div>
+  <div class="fr"><span class="fl">Offset desb.</span><input type="number" id="vZo" value="0.5" step="0.1" style="width:68px"></div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+      <span class="ct" style="margin:0;color:var(--bll)">G-CODE ACABAMENTO</span>
+      <div style="display:flex;gap:3px"><button class="btn-cp" onclick="cpEl('vGf')">📋</button><button class="btn-cp" onclick="dlEl('vGf','visual.txt')">⬇</button></div>
+    </div>
+    <div class="gc" id="vGf">—</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:6px 0 3px">
+      <span class="ct" style="margin:0;color:#ff8844">DESBASTE</span><button class="btn-cp" onclick="cpEl('vGd')">📋</button>
+    </div>
+    <div class="gc" id="vGd">—</div>
+  </div>
+</div>
+<!-- SVG AJUSTE -->
+<div>
+  <div class="card">
+    <div class="ct">Perfil ao vivo — <span id="vSvT" style="color:var(--yel)">ajustando...</span></div>
+    <svg id="vSv" viewBox="0 0 420 340" onmousemove="svgM(event,'vSv','vCb',420,340)" onmouseleave="document.getElementById('vCb').textContent=''"></svg>
+    <div class="coords" id="vCb"></div>
+    <div class="leg">
+      <span style="color:var(--bll)">━ Arco 1 (R1)</span>
+      <span style="color:var(--grn)">━ Arco 2 (R2)</span>
+      <span style="color:#ff4444">━ GAP</span>
+      <span style="color:var(--yel)">● T12</span>
+    </div>
+  </div>
+</div>
+</div>
+</div><!-- /P2 -->
+
+<!-- ══════════════════ TAB 4 — MANUAL ══════════════════ -->
+<div class="panel" id="P3">
+<div class="g2">
+<div>
+  <div class="man-sect" style="margin-bottom:16px">
+    <div class="mh">O que é concordância de raio?</div>
+    <div class="mp">Arco de transição suave entre duas superfícies. Programado como G2/G3 com I e K. Evita canto vivo, tensão concentrada e marcas de ferramenta.</div>
+    <div class="mc">G3 X[∅_fim] Z[Z_fim] I[valor_I] K[valor_K] F[avanço]</div>
+  </div>
+  <div class="man-sect" style="margin-bottom:16px">
+    <div class="mh">O que são I e K?</div>
+    <div class="mp"><span class="mk">I</span> = distância em X (raio) do ponto de início do arco até o centro<br>
+    <span class="mk">K</span> = distância em Z do ponto de início até o centro<br>
+    ⚠ São valores incrementais — podem ser + ou −</div>
+    <div class="mc">(Arco de S1=X111 Z-19, centro em X111 Z116/raio 58)
+G3 X80.66 Z-17.99 I0 K77
+               ↑   ↑  ↑ ↑
+            Xfim Zfim ΔX ΔZ ao centro
+I=0 → mesmo ∅ que S1 · K=77 → centro 77mm em +Z</div>
+  </div>
+  <div class="man-sect" style="margin-bottom:16px">
+    <div class="mh">G2 vs G3</div>
+    <table class="mt">
+      <tr><th>Código</th><th>Rotação</th><th>Uso</th></tr>
+      <tr><td style="color:var(--bll)"><strong>G3</strong></td><td>Anti-horário CCW</td><td>Côncavo — valetas de rotor</td></tr>
+      <tr><td style="color:#ff8844"><strong>G2</strong></td><td>Horário CW</td><td>Convexo — canto externo</td></tr>
+    </table>
+    <div class="mp" style="margin-top:5px">💡 Arco que "afunda" = G3. Canto externo arredondado = G2.</div>
+  </div>
+  <div class="man-sect" style="margin-bottom:16px">
+    <div class="mh">Regra de ouro dos centros</div>
+    <table class="mt">
+      <tr><th>Superfície</th><th>Sentido</th><th>Centro (G3)</th></tr>
+      <tr><td>Face, vem de −∅</td><td>→S1</td><td><span class="mg">C.∅=S1.∅ · C.Z=S1.Z+R</span></td></tr>
+      <tr><td>Sup. OD, vem de −Z</td><td>→S1</td><td><span class="mg">C.Z=S1.Z · C.∅=S1.∅−2R</span></td></tr>
+      <tr><td>Sup. ∅, sai em +Z</td><td>E2→</td><td><span class="mg">C.Z=E2.Z · C.∅=E2.∅+2R</span></td></tr>
+      <tr><td>Face, sai em −∅</td><td>E2→</td><td><span class="mg">C.∅=E2.∅ · C.Z=E2.Z+R</span></td></tr>
+    </table>
+  </div>
+</div>
+<div>
+  <div class="man-sect" style="margin-bottom:16px">
+    <div class="mh">Qual aba usar?</div>
+    <table class="mt">
+      <tr><th>Situação</th><th>Aba</th></tr>
+      <tr><td>Tenho ∅ e Z do centro no desenho</td><td>⑴ Modo A</td></tr>
+      <tr><td>Tenho ∅ final e Z de referência, sem centros</td><td>⑴ Modo B</td></tr>
+      <tr><td>Quero montar o perfil completo</td><td>⑵ Por Pontos</td></tr>
+      <tr><td>Tenho valores aproximados, quero ver e ajustar</td><td>⑶ Ajuste Visual</td></tr>
+      <tr><td>Preciso do R2 exato para tangenciar</td><td>⑶ → ⚡ Auto R2</td></tr>
+    </table>
+  </div>
+  <div class="man-sect" style="margin-bottom:16px">
+    <div class="mh">Ajuste Visual — passo a passo</div>
+    <div class="mp">1. Entre com <span class="mk">S1</span> (∅ e Z de início) e tipo de superfície de entrada<br>
+    2. Entre com <span class="mk">E2</span> (∅ e Z de fim) e tipo de saída<br>
+    3. Mova o slider <span class="mk">R1</span> — perfil atualiza ao vivo<br>
+    4. Mova <span class="mk">R2</span> — veja a barra de GAP diminuir<br>
+    5. Clique <span class="mk">⚡ Auto R2</span> para fechar o gap automaticamente<br>
+    6. Copie o G-code</div>
+  </div>
+  <div class="man-sect" style="margin-bottom:16px">
+    <div class="mh">Exemplo — Rotor HD-0184</div>
+    <div class="mc">(Dados do desenho modelo:)
+S1 = ∅111 Z-19   E2 = ∅71 Z-12.106
+R1 = 77mm         R2 = 6mm
+
+(Calculado:)
+T12 = ∅80.664 Z-17.988
+G3 X80.664 Z-17.988 I0 K77
+G3 X71 Z-12.106 I1.183 K5.882
+
+Desbaste: mesmos arcos com Z+0.5mm em todos pontos</div>
+  </div>
+  <div class="man-sect">
+    <div class="mh">Por Pontos — tipos</div>
+    <table class="mt">
+      <tr><th>Tipo</th><th>Dados</th><th>Quando usar</th></tr>
+      <tr><td>G1</td><td>X∅ + Z fim</td><td>Reta</td></tr>
+      <tr><td>G3 R</td><td>X∅ + Z + R</td><td>Arco com raio, sem I/K</td></tr>
+      <tr><td>G3 I/K</td><td>X∅ + Z + I + K</td><td>Já tem I e K</td></tr>
+      <tr><td>Blend</td><td>X∅ canto + Z + R</td><td>Concordância em canto</td></tr>
+    </table>
+  </div>
+</div>
+</div>
+</div><!-- /P3 -->
+
+</div><!-- /panels -->
+<div class="ftr">
+  <div class="ftr-actions">
+    <a class="btn-improve" target="_blank" rel="noopener"
+       href="https://wa.me/5511999056897?text=Ol%C3%A1%20Rogerinho.%0AGostaria%20de%20sugerir%20uma%20melhoria%20no%20sistema%20CNC%20Perfil.">
+      ☕ Sugerir melhoria, clique aqui!
+    </a>
+  </div>
+  <div>✝️ Para a glória de Deus · Col 3:23 · KSB Brasil · Usinagem Jundiaí · &lt;/&gt; Rogerinho Ramos</div>
+</div>
+
+<button id="installAppBtn" class="pwa-install" type="button">📲 Instalar app</button>
+
+<script>
+'use strict';
+// ══════════════════════════════════ MATH ══════════════════════════════════
+const nrm=v=>{const l=Math.hypot(v[0],v[1]);return l<1e-12?[0,0]:[v[0]/l,v[1]/l]};
+const f4=v=>parseFloat(v).toFixed(4);
+
+// arcPts — convenção corrigida torno Fanuc (G3=ângulo decresce, G2=cresce)
+function arcPts(C,S,E,g,n=48){
+  const[cx,cz]=C,ao=([x,z])=>Math.atan2(z-cz,x-cx);
+  let a0=ao(S),a1=ao(E);
+  if(g===2&&a1<a0)a1+=2*Math.PI;
+  if(g===3&&a1>a0)a1-=2*Math.PI;
+  const R=Math.hypot(S[0]-cx,S[1]-cz);
+  return Array.from({length:n+1},(_,i)=>{const a=a0+(a1-a0)*i/n;return[cx+R*Math.cos(a),cz+R*Math.sin(a)];});
+}
+
+// Centro derivado da superfície — G3: centro à DIREITA da direção de avanço
+function ctrFS(pt,srf,R,g){
+  const dm={'face_neg':[-1,0],'od_neg':[0,-1],'od_pos':[0,1],'diam_pos':[0,1],'diam_neg':[0,-1],'face_pos':[1,0]};
+  const d=dm[srf]||[-1,0];
+  const n=g===3?[d[1],-d[0]]:[-d[1],d[0]];
+  return[pt[0]+R*n[0],pt[1]+R*n[1]];
+}
+
+function exitDir(C,end,g){const r=nrm([end[0]-C[0],end[1]-C[1]]);return g===3?[r[1],-r[0]]:[-r[1],r[0]];}
+function ctrFD(pt,d,R,g){const n=g===3?[d[1],-d[0]]:[-d[1],d[0]];return[pt[0]+R*n[0],pt[1]+R*n[1]];}
+
+function blendArc(P0,P1,P2,R){
+  const d1=nrm([P1[0]-P0[0],P1[1]-P0[1]]),d2=nrm([P2[0]-P1[0],P2[1]-P1[1]]);
+  const n1=[-d1[1],d1[0]],n2=[-d2[1],d2[0]];
+  const cr=d1[0]*d2[1]-d1[1]*d2[0];
+  if(Math.abs(cr)<1e-6)return{err:'Colinear'};
+  const eps=cr>0?R:-R;
+  const b=[P1[0]-P0[0]+eps*(n2[0]-n1[0]),P1[1]-P0[1]+eps*(n2[1]-n1[1])];
+  const det=d1[0]*(-d2[1])-d1[1]*(-d2[0]);
+  if(Math.abs(det)<1e-12)return{err:'Paralelo'};
+  const t=(b[0]*(-d2[1])-b[1]*(-d2[0]))/det,s=(d1[0]*b[1]-d1[1]*b[0])/det;
+  const C=[P0[0]+t*d1[0]+eps*n1[0],P0[1]+t*d1[1]+eps*n1[1]];
+  const S=[P0[0]+t*d1[0],P0[1]+t*d1[1]],E=[P1[0]+s*d2[0],P1[1]+s*d2[1]];
+  const L1=Math.hypot(P1[0]-P0[0],P1[1]-P0[1]),L2=Math.hypot(P2[0]-P1[0],P2[1]-P1[1]);
+  return{C,S,E,g:cr<0?3:2,R,I:C[0]-S[0],K:C[1]-S[1],Rv:Math.hypot(S[0]-C[0],S[1]-C[1]),
+    warn:(t<-0.02||t>L1+0.02||s<-0.02||s>L2+0.02)?'R>segmento':null};
+}
+
+// ══════════════════════════════════ SVG ══════════════════════════════════
+const svgB={};
+
+// Cores do tema para SVG (gerado em JS, não pode usar var())
+function TC(k){
+  const t=document.body.dataset.t||'';
+  const c={
+    '':  {gl:'#0d1f30',gt:'#1a4060',ga:'#1a4a6a',a1:'#4ab8ff',a2:'#44dd88'},
+    gr:  {gl:'#2a2a2a',gt:'#555555',ga:'#3a3a5a',a1:'#4ab8ff',a2:'#44dd88'},
+    lt:  {gl:'#c5d5e8',gt:'#5070a0',ga:'#8ab5d0',a1:'#0055aa',a2:'#226633'},
+  };
+  return(c[t]||c[''])[k];
+}
+
+function setupTf(pts,W,H,mg){
+  const xs=pts.map(p=>p[0]),zs=pts.map(p=>p[1]);
+  const xMx=Math.max(...xs)+5,xMn=Math.max(0,Math.min(...xs)-5);
+  const zMx=Math.max(...zs)+4,zMn=Math.min(...zs)-4;
+  const sc=Math.min((W-mg.l-mg.r)/Math.max(zMx-zMn,1),(H-mg.t-mg.b)/Math.max(xMx-xMn,1));
+  return{ts:([xr,z])=>[mg.l+(z-zMn)*sc,mg.t+(xMx-xr)*sc],sc,xMn,xMx,zMn,zMx,mg};
+}
+
+function buildGrid(tf,W,H){
+  const{ts,zMn,zMx,xMn,xMx,mg}=tf;
+  const gl=TC('gl'),gt=TC('gt'),ga=TC('ga');
+  let h='';
+  const zSt=Math.abs(zMx-zMn)>50?10:5;
+  for(let z=Math.ceil(zMn/zSt)*zSt;z<=zMx;z+=zSt){
+    const[gx]=ts([0,z]);
+    h+=`<line x1="${gx|0}" y1="${mg.t}" x2="${gx|0}" y2="${H-mg.b}" stroke="${gl}" stroke-width="0.5"/>`;
+    h+=`<text x="${gx|0}" y="${H-mg.b+13}" fill="${gt}" font-size="8.5" text-anchor="middle" font-family="Courier New">Z${z}</text>`;
+  }
+  for(let xr=Math.ceil(xMn/5)*5;xr<=xMx;xr+=5){
+    const[,gy]=ts([xr,0]);
+    h+=`<line x1="${mg.l}" y1="${gy|0}" x2="${W-mg.r}" y2="${gy|0}" stroke="${gl}" stroke-width="0.5"/>`;
+    h+=`<text x="${mg.l-4}" y="${(gy+3)|0}" fill="${gt}" font-size="8.5" text-anchor="end" font-family="Courier New">∅${xr*2}</text>`;
+  }
+  const[,cly]=ts([xMx,0]);
+  h+=`<line x1="${mg.l}" y1="${cly|0}" x2="${W-mg.r}" y2="${cly|0}" stroke="${ga}" stroke-width="0.8" stroke-dasharray="7,4"/>`;
+  return h;
+}
+
+function pD(pts){return pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');}
+
+function dotS(ts,p,col,r2,lbl,dx,dy){
+  const[x,y]=ts(p);
+  return`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r2}" fill="${col}" stroke="#07111d" stroke-width="1.5"/>
+<text x="${(x+dx).toFixed(1)}" y="${(y+dy).toFixed(1)}" fill="${col}" font-size="9" font-family="Courier New">${lbl}</text>`;
+}
+
+function svgM(e,sid,bid,W,H){
+  const b=svgB[sid];if(!b)return;
+  const sv=document.getElementById(sid),rect=sv.getBoundingClientRect();
+  const sx=(e.clientX-rect.left)*W/rect.width,sy=(e.clientY-rect.top)*H/rect.height;
+  const{mg,sc,zMn,xMx}=b;
+  if(sx>=mg.l&&sx<=W-mg.r&&sy>=mg.t&&sy<=H-mg.b){
+    const xr=xMx-(sy-mg.t)/sc,Z=zMn+(sx-mg.l)/sc;
+    document.getElementById(bid).textContent=`X(∅) ${(xr*2).toFixed(3)}   Z ${Z.toFixed(3)}`;
+  }
+}
+
+// Desenha arcos 2 no SVG dado C1,C2,S1,T12,E2
+function drawArcs(svgId,C1,C2,R1,R2,G1,G2v,S1,T12,E2,W,H){
+  const mg={l:50,r:12,t:13,b:30};
+  const ap1=arcPts(C1,S1,T12,G1),ap2=arcPts(C2,T12,E2,G2v);
+  const all=[S1,T12,E2,...ap1.filter((_,i)=>i%7===0),...ap2.filter((_,i)=>i%7===0)];
+  const tf=setupTf(all,W,H,mg);svgB[svgId]=tf;
+  const{ts}=tf;const c1=TC('a1'),c2=TC('a2');
+  let h=buildGrid(tf,W,H);
+  h+=`<path d="${pD(ap1.map(ts))}" fill="none" stroke="${c1}" stroke-width="2.5" stroke-linecap="round"/>`;
+  h+=`<path d="${pD(ap2.map(ts))}" fill="none" stroke="${c2}" stroke-width="2.5" stroke-linecap="round"/>`;
+  h+=dotS(ts,S1,c2,5,'S1',5,-4);h+=dotS(ts,T12,'#ffcc44',6,'T12',5,-5);h+=dotS(ts,E2,c2,5,'E2',-30,-4);
+  document.getElementById(svgId).innerHTML=h;
+}
+
+// ══════════════════════════════════ THEME ══════════════════════════════════
+function setTheme(t,btnId){
+  document.body.className=t?`t-${t}`:'';
+  document.body.dataset.t=t;
+  document.querySelectorAll('.thm-btn').forEach(b=>b.classList.remove('on'));
+  if(btnId)document.getElementById(btnId).classList.add('on');
+  try{localStorage.setItem('cnc-t',t);}catch(e){}
+  aUpd(); // redraw SVG with new theme colors
+}
+
+// ══════════════════════════════════ TABS ══════════════════════════════════
+function ST(n,el){
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('on',i===n));
+  ['P0','P1','P2','P3'].forEach((id,i)=>document.getElementById(id).classList.toggle('on',i===n));
+  if(n===2)aUpd();
+}
+
+// ══════════════════════════════════ TAB 1 ══════════════════════════════════
+function setM(m){
+  document.getElementById('mA').style.display=m==='A'?'block':'none';
+  document.getElementById('mB').style.display=m==='B'?'block':'none';
+  document.getElementById('mAb').classList.toggle('on',m==='A');
+  document.getElementById('mBb').classList.toggle('on',m==='B');
+}
+function tE(){const v=document.getElementById('eT').value;document.getElementById('eFR').style.display=v==='face'?'flex':'none';document.getElementById('eDR').style.display=v==='diam'?'flex':'none';document.getElementById('ePR').style.display=v==='pt'?'block':'none';}
+function tX(){const v=document.getElementById('xT').value;document.getElementById('xDR').style.display=v==='diam'?'flex':'none';document.getElementById('xFR').style.display=v==='face'?'flex':'none';document.getElementById('xPR').style.display=v==='pt'?'block':'none';}
+
+function calcA(){
+  const gv=id=>document.getElementById(id).value,gf=id=>parseFloat(gv(id));
+  const C1=[gf('c1d')/2,gf('c1z')],R1=gf('r1'),G1=parseInt(gv('g1s'));
+  const C2=[gf('c2d')/2,gf('c2z')],R2=gf('r2'),G2v=parseInt(gv('g2s'));
+  const F=gf('cF'),Zo=gf('cZ'),et=gv('eT'),xt=gv('xT');
+  let S1,I1,K1,eW=null;
+  if(et==='face'){const Zf=gf('eZ');S1=[C1[0],Zf];I1=0;K1=C1[1]-Zf;if(Math.abs(Math.abs(K1)-R1)>0.5)eW=`K≠R1`;}
+  else if(et==='diam'){const xrS=gf('eD')/2,dx=C1[0]-xrS,d2=R1*R1-dx*dx;const dz=d2>=0?Math.sqrt(d2):0;S1=[xrS,C1[1]-dz];I1=dx;K1=C1[1]-S1[1];if(d2<-0.5)eW='Sup. não alcança arco';}
+  else{S1=[gf('ePD')/2,gf('ePZ')];I1=C1[0]-S1[0];K1=C1[1]-S1[1];}
+  const d12=Math.hypot(C2[0]-C1[0],C2[1]-C1[1]);
+  const T12=[C1[0]+R1*(C2[0]-C1[0])/d12,C1[1]+R1*(C2[1]-C1[1])/d12];
+  const tOk=Math.abs(d12-(R1+R2))<2||Math.abs(d12-Math.abs(R1-R2))<2;
+  let E2,I2,K2;
+  if(xt==='diam'){E2=[gf('xD')/2,C2[1]];I2=C2[0]-T12[0];K2=C2[1]-T12[1];}
+  else if(xt==='face'){E2=[C2[0],gf('xZ')];I2=C2[0]-T12[0];K2=C2[1]-T12[1];}
+  else{E2=[gf('xPD')/2,gf('xPZ')];I2=C2[0]-T12[0];K2=C2[1]-T12[1];}
+  const Rv1=Math.hypot(S1[0]-C1[0],S1[1]-C1[1]),Rv2=Math.hypot(T12[0]-C2[0],T12[1]-C2[1]);
+  const ok1=Math.abs(Rv1-R1)<0.5,ok2=Math.abs(Rv2-R2)<0.5;
+  const X=r=>(r*2).toFixed(4),Z=z=>z.toFixed(4);
+  const wb=w=>w?`<div style="font-size:9px;color:var(--yel)">⚠ ${w}</div>`:'<div style="font-size:9px;color:var(--grn)">✓ ok</div>';
+  document.getElementById('aRes').innerHTML=
+    `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:6px">
+    <div class="rb gn"><div class="rl">S1</div><div class="rv g">∅${X(S1[0])}</div><div class="rv g">Z${Z(S1[1])}</div>${wb(eW)}</div>
+    <div class="rb ye"><div class="rl">T12</div><div class="rv y">∅${X(T12[0])}</div><div class="rv y">Z${Z(T12[1])}</div>${tOk?'<div style="font-size:9px;color:var(--grn)">✓</div>':'<div style="font-size:9px;color:var(--yel)">⚠ verificar</div>'}</div>
+    <div class="rb gn"><div class="rl">E2</div><div class="rv g">∅${X(E2[0])}</div><div class="rv g">Z${Z(E2[1])}</div></div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
+    <div class="rb hi"><div class="rl">G${G1} R${R1}</div><div class="rv b">I=${f4(I1)}</div><div class="rv b">K=${f4(K1)}</div><div style="font-size:9px;color:${ok1?'#44dd88':'#dd4444'}">Rv=${Rv1.toFixed(3)} ${ok1?'✅':'❌'}</div></div>
+    <div class="rb hi"><div class="rl">G${G2v} R≈${R2}</div><div class="rv b">I=${f4(I2)}</div><div class="rv b">K=${f4(K2)}</div><div style="font-size:9px;color:${ok2?'#44dd88':'#dd4444'}">Rv=${Rv2.toFixed(3)} ${ok2?'✅':'❌'}</div></div></div>`;
+  const mkGC=(zo)=>[`(PERFIL — ${zo===0?'ACABAMENTO':'DESBASTE Z+'+Zo})`,
+    `(S1=∅${X(S1[0])} Z${Z(S1[1])} · T12=∅${X(T12[0])} Z${Z(T12[1])} · E2=∅${X(E2[0])} Z${Z(E2[1])})`,``,
+    `G1 X${X(S1[0])} Z${(S1[1]+zo).toFixed(4)} F${F}`,
+    `G${G1} X${X(T12[0])} Z${(T12[1]+zo).toFixed(4)} I${f4(I1)} K${(K1+zo).toFixed(4)} F${F}`,
+    `G${G2v} X${X(E2[0])} Z${(E2[1]+zo).toFixed(4)} I${f4(I2)} K${(K2+zo).toFixed(4)} F${F}`].join('\n');
+  document.getElementById('aGf').textContent=mkGC(0);document.getElementById('aGd').textContent=mkGC(Zo);
+  drawArcs('aSv',C1,C2,R1,R2,G1,G2v,S1,T12,E2,420,270);
+}
+
+function ldRotA(){const s=(i,v)=>document.getElementById(i).value=v;s('eT','face');s('eZ','-19');tE();s('c1d','111');s('c1z','58');s('r1','77');s('g1s','3');s('c2d','83.03');s('c2z','-12.106');s('r2','6');s('g2s','3');s('xT','diam');s('xD','71');tX();s('cF','0.15');s('cZ','0.5');calcA();}
+function clrA(){['aRes','aGf','aGd'].forEach(id=>{const el=document.getElementById(id);if(el.tagName==='DIV')el.innerHTML='<p style="color:var(--dim)">Preencha →</p>';else el.textContent='—';});document.getElementById('aSv').innerHTML='';}
+
+function calcB(){
+  const gv=id=>document.getElementById(id).value,gf=id=>parseFloat(gv(id));
+  const S1=[gf('bs1d')/2,gf('bs1z')],R1=gf('br1'),G1=parseInt(gv('bg1'));
+  const E2=[gf('be2d')/2,gf('be2z')],R2=gf('br2'),G2v=parseInt(gv('bg2'));
+  const F=gf('bF'),Zo=gf('bZ');
+  const C1=ctrFS(S1,gv('bEn'),R1,G1),C2=ctrFS(E2,gv('bEx'),R2,G2v);
+  const I1=C1[0]-S1[0],K1=C1[1]-S1[1];
+  const d12=Math.hypot(C2[0]-C1[0],C2[1]-C1[1]);
+  const T12=[C1[0]+R1*(C2[0]-C1[0])/d12,C1[1]+R1*(C2[1]-C1[1])/d12];
+  const I2=C2[0]-T12[0],K2=C2[1]-T12[1];
+  const Rv1=Math.hypot(S1[0]-C1[0],S1[1]-C1[1]),Rv2=Math.hypot(T12[0]-C2[0],T12[1]-C2[1]);
+  const ok1=Math.abs(Rv1-R1)<0.5,ok2=Math.abs(Rv2-R2)<0.5;
+  const tOk=Math.abs(d12-(R1+R2))<2||Math.abs(d12-Math.abs(R1-R2))<2;
+  document.getElementById('bc1d').textContent=`∅${(C1[0]*2).toFixed(3)} Z${C1[1].toFixed(3)}`;
+  document.getElementById('bc2d').textContent=`∅${(C2[0]*2).toFixed(3)} Z${C2[1].toFixed(3)}`;
+  const X=r=>(r*2).toFixed(4),Z=z=>z.toFixed(4);
+  document.getElementById('bRes').innerHTML=
+    `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:6px">
+    <div class="rb gn"><div class="rl">S1</div><div class="rv g">∅${X(S1[0])}</div><div class="rv g">Z${Z(S1[1])}</div></div>
+    <div class="rb ye"><div class="rl">T12</div><div class="rv y">∅${X(T12[0])}</div><div class="rv y">Z${Z(T12[1])}</div>${tOk?'<div style="font-size:9px;color:var(--grn)">✓</div>':'<div style="font-size:9px;color:var(--yel)">⚠</div>'}</div>
+    <div class="rb gn"><div class="rl">E2</div><div class="rv g">∅${X(E2[0])}</div><div class="rv g">Z${Z(E2[1])}</div></div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
+    <div class="rb hi"><div class="rl">G${G1}</div><div class="rv b">I=${f4(I1)} K=${f4(K1)}</div><div style="font-size:9px;color:${ok1?'#44dd88':'#dd4444'}">Rv=${Rv1.toFixed(3)} ${ok1?'✅':'❌'}</div></div>
+    <div class="rb hi"><div class="rl">G${G2v}</div><div class="rv b">I=${f4(I2)} K=${f4(K2)}</div><div style="font-size:9px;color:${ok2?'#44dd88':'#dd4444'}">Rv=${Rv2.toFixed(3)} ${ok2?'✅':'❌'}</div></div></div>`;
+  const mkGC=(zo)=>[`(MODO B — ${zo===0?'ACABAMENTO':'DESBASTE Z+'+Zo})`,
+    `(C1=∅${(C1[0]*2).toFixed(3)} Z${C1[1].toFixed(3)} · C2=∅${(C2[0]*2).toFixed(3)} Z${C2[1].toFixed(3)})`,``,
+    `G1 X${X(S1[0])} Z${(S1[1]+zo).toFixed(4)} F${F}`,
+    `G${G1} X${X(T12[0])} Z${(T12[1]+zo).toFixed(4)} I${f4(I1)} K${(K1+zo).toFixed(4)} F${F}`,
+    `G${G2v} X${X(E2[0])} Z${(E2[1]+zo).toFixed(4)} I${f4(I2)} K${(K2+zo).toFixed(4)} F${F}`].join('\n');
+  document.getElementById('bGf').textContent=mkGC(0);document.getElementById('bGd').textContent=mkGC(Zo);
+  drawArcs('bSv',C1,C2,R1,R2,G1,G2v,S1,T12,E2,420,270);
+}
+function ldRotB(){const s=(i,v)=>document.getElementById(i).value=v;s('bs1d','111');s('bs1z','-19');s('bEn','face_neg');s('br1','77');s('bg1','3');s('br2','6');s('bg2','3');s('be2d','71');s('be2z','-12.106');s('bEx','diam_pos');calcB();}
+function ldExB(){const s=(i,v)=>document.getElementById(i).value=v;s('bs1d','111');s('bs1z','-14.5');s('bEn','face_neg');s('br1','80');s('bg1','3');s('br2','5.6');s('bg2','3');s('be2d','76');s('be2z','-10');s('bEx','diam_pos');calcB();}
+
+// ══════════════════════════════════ TAB 2 ══════════════════════════════════
+let pRows=[],pNxt=1;
+function pA(t){const l=pRows[pRows.length-1];pRows.push({id:pNxt++,type:t,xd:l?.xd??60,z:(l?.z??0)-10,r:0,i:0,k:10});pR();}
+function pDel(id){pRows=pRows.filter(r=>r.id!==id);pR();}
+function pU(id,k,v){pRows=pRows.map(r=>r.id===id?{...r,[k]:k==='type'?v:parseFloat(v)||0}:r);pR();}
+function pComp(){
+  const segs=[];if(!pRows.length)return segs;
+  let pos=[pRows[0].xd/2,pRows[0].z],dir=null;
+  for(let i=1;i<pRows.length;i++){
+    const r=pRows[i],xr=r.xd/2,z=r.z;
+    if(r.type==='G1'){const to=[xr,z],d=nrm([to[0]-pos[0],to[1]-pos[1]]);segs.push({type:'L',from:[...pos],to,row:r});pos=to;dir=d;}
+    else if(r.type==='G3R'||r.type==='G2R'){
+      const g=r.type==='G3R'?3:2,end=[xr,z];
+      if(!dir||!r.r){segs.push({type:'A',from:[...pos],to:end,g,err:'Sem dir/R',row:r});pos=end;continue;}
+      const C=ctrFD(pos,dir,r.r,g);
+      segs.push({type:'A',from:[...pos],to:end,C,g,R:r.r,I:C[0]-pos[0],K:C[1]-pos[1],Rv:Math.hypot(end[0]-C[0],end[1]-C[1]),row:r});
+      pos=end;dir=exitDir(C,end,g);
+    } else if(r.type==='G3IK'||r.type==='G2IK'){
+      const g=r.type==='G3IK'?3:2,end=[xr,z];
+      const C=[pos[0]+(r.i||0),pos[1]+(r.k||0)];
+      const R=Math.hypot(pos[0]-C[0],pos[1]-C[1]);
+      segs.push({type:'A',from:[...pos],to:end,C,g,R,I:r.i||0,K:r.k||0,Rv:Math.hypot(end[0]-C[0],end[1]-C[1]),row:r});
+      pos=end;dir=exitDir(C,end,g);
+    } else if(r.type==='BLEND'){
+      let nx=null;
+      for(let j=i+1;j<pRows.length;j++){if(pRows[j].xd!==undefined){nx=[pRows[j].xd/2,pRows[j].z];break;}}
+      if(!nx)continue;
+      const ba=blendArc([...pos],[xr,z],nx,r.r||0);
+      if(ba.err){segs.push({type:'A',from:[...pos],to:[xr,z],err:ba.err,row:r});continue;}
+      segs.push({type:'L',from:[...pos],to:ba.S,row:r});
+      segs.push({type:'A',from:ba.S,to:ba.E,C:ba.C,g:ba.g,R:ba.R,I:ba.I,K:ba.K,Rv:ba.Rv,row:r});
+      pos=ba.E;dir=exitDir(ba.C,ba.E,ba.g);
+    }
+  }
+  return segs;
+}
+function pR(){
+  const segs=pComp();const F=parseFloat(document.getElementById('pF').value)||0.15;const Zo=parseFloat(document.getElementById('pZ').value)||0;
+  const srm={};segs.forEach(s=>{if(s.row)srm[s.row.id]=s;});
+  const tb=document.getElementById('pTb');tb.innerHTML='';
+  const types=['G1','G3R','G2R','G3IK','G2IK','BLEND'];
+  pRows.forEach((r,i)=>{
+    const s=srm[r.id];const tr=document.createElement('tr');if(s?.type==='A')tr.className='arc';
+    const topts=types.map(t=>`<option value="${t}"${r.type===t?' selected':''}>${t}</option>`).join('');
+    let params='—';
+    if(['G3R','G2R','BLEND'].includes(r.type))params=`R=<input type="number" value="${r.r}" step="0.5" style="width:50px" onchange="pU(${r.id},'r',this.value)">`;
+    else if(['G3IK','G2IK'].includes(r.type))params=`I=<input type="number" value="${r.i}" step="0.001" style="width:46px" onchange="pU(${r.id},'i',this.value)"> K=<input type="number" value="${r.k}" step="0.001" style="width:46px" onchange="pU(${r.id},'k',this.value)">`;
+    let calc='';
+    if(s?.type==='A'){if(s.err)calc=`<span style="color:#dd4444;font-size:10px">⚠${s.err}</span>`;else{const ok=!s.warn&&Math.abs((s.Rv||0)-s.R)<0.5;calc=`<span style="color:${ok?'#4ab8ff':'#dd4444'};font-size:10px">I=${f4(s.I)} K=${f4(s.K)}<br>Rv=${(s.Rv||0).toFixed(2)} ${ok?'✓':'⚠'}</span>`;}}
+    else if(s?.type==='L')calc=`<span style="color:#44dd88;font-size:10px">G1✓</span>`;
+    tr.innerHTML=`<td style="text-align:center;color:var(--dim);font-size:10px">${i+1}</td>
+      <td><select style="font-size:10px;padding:2px;background:var(--inp);color:var(--itxt);border:1px solid var(--bdr);border-radius:3px" onchange="pU(${r.id},'type',this.value)">${topts}</select></td>
+      <td><input type="number" value="${r.xd}" step="0.1" onchange="pU(${r.id},'xd',this.value)"></td>
+      <td><input type="number" value="${r.z}" step="0.1" onchange="pU(${r.id},'z',this.value)"></td>
+      <td style="white-space:nowrap">${params}</td><td>${calc}</td>
+      <td><button class="btn-del" onclick="pDel(${r.id})">✕</button></td>`;
+    tb.appendChild(tr);
+  });
+  const as=segs.filter(s=>s.type==='A'&&!s.err);
+  const ac=document.getElementById('pArcC');
+  if(as.length){ac.style.display='';document.getElementById('pArcB').innerHTML=as.map((s,idx)=>{const ok=!s.warn&&Math.abs((s.Rv||0)-s.R)<0.5;return`<tr><td>${idx+1}</td><td style="color:${s.g===3?'#4ab8ff':'#ff8844'};font-weight:700">G${s.g}</td><td>${s.R.toFixed(2)}</td><td style="color:#4ab8ff">${f4(s.I)}</td><td style="color:#4ab8ff">${f4(s.K)}</td><td style="color:${ok?'#44dd88':'#dd4444'}">${(s.Rv||0).toFixed(3)}</td><td>${ok?'✅':'❌'}</td></tr>`;}).join('');}
+  else ac.style.display='none';
+  const mkGC=(zo)=>{if(!segs.length)return'(SEM PONTOS)';const X=xr=>(xr*2).toFixed(4),Z=z=>(z+zo).toFixed(4);const ls=['(PERFIL CNC)',''];if(segs.length)ls.push(`G0 X${X(segs[0].from[0])} Z${Z(segs[0].from[1])}`);segs.forEach(s=>{if(s.err)return;if(s.type==='L'&&Math.hypot(s.to[0]-s.from[0],s.to[1]-s.from[1])>0.01)ls.push(`G1 X${X(s.to[0])} Z${Z(s.to[1])} F${F}`);else if(s.type==='A')ls.push(`G${s.g} X${X(s.to[0])} Z${Z(s.to[1])} I${f4(s.I)} K${(s.K+zo).toFixed(4)} F${F}`);});return ls.join('\n');};
+  document.getElementById('pGf').textContent=mkGC(0);document.getElementById('pGd').textContent=mkGC(Zo);
+  if(segs.length){
+    const all=[...segs.map(s=>s.from),...segs.map(s=>s.to)];
+    const W=420,H=300,mg={l:50,r:12,t:13,b:30};
+    const tf=setupTf(all,W,H,mg);svgB['pSv']=tf;const{ts}=tf;
+    let h=buildGrid(tf,W,H);
+    segs.forEach(s=>{if(s.err)return;const col=s.type==='L'?TC('gt'):s.g===3?TC('a1'):'#ff8844';const pts=s.type==='L'?[s.from,s.to]:arcPts(s.C,s.from,s.to,s.g);h+=`<path d="${pD(pts.map(ts))}" fill="none" stroke="${col}" stroke-width="2.5" stroke-linecap="round"/>`;if(s.type==='A'&&!s.err)[s.from,s.to].forEach(p=>{const[px,py]=ts(p);h+=`<circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="4" fill="${TC('a2')}" stroke="#07111d" stroke-width="1.5"/>`;});});
+    document.getElementById('pSv').innerHTML=h;
+  }
+}
+function pLdR(){pRows=[];pNxt=1;const a=(t,xd,z,e={})=>pRows.push({id:pNxt++,type:t,xd,z,r:0,i:0,k:10,...e});a('G1',124,0);a('G1',124,-18);a('G1',122.2,-19);a('G1',111,-19);a('G3R',80.664,-17.988,{r:77});a('G3R',71,-12.106,{r:6});a('G1',71,-9.5);pR();}
+function pLdS(){pRows=[];pNxt=1;const a=(t,xd,z,e={})=>pRows.push({id:pNxt++,type:t,xd,z,r:0,i:0,k:10,...e});a('G1',80,0);a('G1',80,-30);a('BLEND',60,-30,{r:6});a('G1',60,-50);a('BLEND',40,-50,{r:4});a('G1',40,-70);pR();}
+function pClr(){pRows=[];pNxt=1;pR();}
+
+// ══════════════════════════════════ TAB 3 ══════════════════════════════════
+function r1S(v){document.getElementById('vr1s').value=v;document.getElementById('vr1n').value=v;document.getElementById('vr1v').textContent=parseFloat(v).toFixed(1)+' mm';aUpd();}
+function r2S(v){document.getElementById('vr2s').value=v;document.getElementById('vr2n').value=v;document.getElementById('vr2v').textContent=parseFloat(v).toFixed(1)+' mm';aUpd();}
+
+function aUpd(){
+  const gv=id=>document.getElementById(id).value,gf=id=>parseFloat(gv(id));
+  const S1=[gf('vs1d')/2,gf('vs1z')],E2=[gf('ve2d')/2,gf('ve2z')];
+  const R1=gf('vr1n'),G1=parseInt(gv('vg1')),R2=gf('vr2n'),G2v=parseInt(gv('vg2'));
+  const F=gf('vF'),Zo=gf('vZo');
+  if(isNaN(R1)||isNaN(R2)||R1<0.5||R2<0.5)return;
+  const C1=ctrFS(S1,gv('vEn'),R1,G1),C2=ctrFS(E2,gv('vEx'),R2,G2v);
+  const d12=Math.hypot(C2[0]-C1[0],C2[1]-C1[1]);
+  const T12=[C1[0]+R1*(C2[0]-C1[0])/d12,C1[1]+R1*(C2[1]-C1[1])/d12];
+  // T12b: ponto no arco 2 (para mostrar gap)
+  const T12b=[C2[0]-R2*(C2[0]-C1[0])/d12,C2[1]-R2*(C2[1]-C1[1])/d12];
+  const I1=C1[0]-S1[0],K1=C1[1]-S1[1];
+  const I2=C2[0]-T12[0],K2=C2[1]-T12[1];
+  const gapInt=d12-(R1-R2),gapExt=d12-(R1+R2);
+  const gap=Math.abs(gapInt)<Math.abs(gapExt)?gapInt:gapExt;
+  const isTang=Math.abs(gap)<0.05,isClose=Math.abs(gap)<1.5;
+  // Display
+  document.getElementById('vI1').textContent=f4(I1);document.getElementById('vK1').textContent=f4(K1);
+  document.getElementById('vI2').textContent=f4(I2);document.getElementById('vK2').textContent=f4(K2);
+  const sb=document.getElementById('vSb');
+  if(isTang){sb.className='sbar ok';sb.textContent='✅ TANGENTE — Gap = '+Math.abs(gap).toFixed(4)+'mm';}
+  else if(isClose){sb.className='sbar warn';sb.textContent='⚠ Quase — Gap = '+(gap>0?'+':'')+gap.toFixed(3)+'mm';}
+  else{sb.className='sbar bad';sb.textContent='❌ Não tangente — Gap = '+(gap>0?'+':'')+gap.toFixed(2)+'mm — use ⚡ Auto R2';}
+  const pct=Math.max(0,Math.min(100,100-Math.abs(gap)*8));
+  const gb=document.getElementById('vGB');gb.style.width=pct+'%';gb.style.background=isTang?'#44dd88':isClose?'#ffcc44':'#dd4444';
+  document.getElementById('vSvT').textContent=isTang?'TANGENTE ✓':('Gap '+Math.abs(gap).toFixed(2)+'mm');
+  const X=r=>(r*2).toFixed(4),Z=z=>z.toFixed(4);
+  document.getElementById('vResD').innerHTML=
+    `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:5px">
+    <div class="rb gn"><div class="rl">S1</div><div class="rv g" style="font-size:12px">∅${X(S1[0])}</div><div class="rv g" style="font-size:12px">Z${Z(S1[1])}</div></div>
+    <div class="rb ye"><div class="rl">T12</div><div class="rv y" style="font-size:12px">∅${X(T12[0])}</div><div class="rv y" style="font-size:12px">Z${Z(T12[1])}</div></div>
+    <div class="rb gn"><div class="rl">E2</div><div class="rv g" style="font-size:12px">∅${X(E2[0])}</div><div class="rv g" style="font-size:12px">Z${Z(E2[1])}</div></div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+    <div class="rb hi"><div class="rl">G${G1} R1=${R1.toFixed(1)}</div><div class="rv b" style="font-size:12px">I=${f4(I1)}</div><div class="rv b" style="font-size:12px">K=${f4(K1)}</div></div>
+    <div class="rb hi"><div class="rl">G${G2v} R2=${R2.toFixed(1)}</div><div class="rv b" style="font-size:12px">I=${f4(I2)}</div><div class="rv b" style="font-size:12px">K=${f4(K2)}</div></div></div>`;
+  const mkGC=(zo)=>[`(AJUSTE VISUAL — ${zo===0?'ACABAMENTO':'DESBASTE Z+'+Zo})`,
+    `(R1=${R1.toFixed(2)} R2=${R2.toFixed(2)} Gap=${gap.toFixed(4)}mm)`,
+    `(S1=∅${X(S1[0])} Z${Z(S1[1])} · T12=∅${X(T12[0])} Z${Z(T12[1])} · E2=∅${X(E2[0])} Z${Z(E2[1])})`,``,
+    `G1 X${X(S1[0])} Z${(S1[1]+zo).toFixed(4)} F${F}`,
+    `G${G1} X${X(T12[0])} Z${(T12[1]+zo).toFixed(4)} I${f4(I1)} K${(K1+zo).toFixed(4)} F${F}`,
+    `G${G2v} X${X(E2[0])} Z${(E2[1]+zo).toFixed(4)} I${f4(I2)} K${(K2+zo).toFixed(4)} F${F}`].join('\n');
+  document.getElementById('vGf').textContent=mkGC(0);document.getElementById('vGd').textContent=mkGC(Zo);
+  // SVG
+  const W=420,H=340,mg={l:50,r:12,t:13,b:32};
+  const ap1=arcPts(C1,S1,T12,G1),ap2=arcPts(C2,T12b,E2,G2v);
+  const all=[S1,T12,T12b,E2,...ap1.filter((_,i)=>i%6===0),...ap2.filter((_,i)=>i%6===0)];
+  const tf=setupTf(all,W,H,mg);svgB['vSv']=tf;const{ts}=tf;
+  let h=buildGrid(tf,W,H);
+  h+=`<path d="${pD(ap1.map(ts))}" fill="none" stroke="${TC('a1')}" stroke-width="2.5" stroke-linecap="round"/>`;
+  h+=`<path d="${pD(ap2.map(ts))}" fill="none" stroke="${TC('a2')}" stroke-width="2.5" stroke-linecap="round"/>`;
+  if(!isTang&&Math.abs(gap)>0.05){
+    const[t1x,t1y]=ts(T12),[t2x,t2y]=ts(T12b);
+    h+=`<line x1="${t1x.toFixed(1)}" y1="${t1y.toFixed(1)}" x2="${t2x.toFixed(1)}" y2="${t2y.toFixed(1)}" stroke="#ff4444" stroke-width="2.5" stroke-dasharray="3,2"/>`;
+    h+=`<circle cx="${t1x.toFixed(1)}" cy="${t1y.toFixed(1)}" r="5" fill="${TC('a1')}" stroke="#07111d" stroke-width="1.5"/>`;
+    h+=`<circle cx="${t2x.toFixed(1)}" cy="${t2y.toFixed(1)}" r="5" fill="${TC('a2')}" stroke="#07111d" stroke-width="1.5"/>`;
+    h+=`<text x="${((t1x+t2x)/2+5).toFixed(1)}" y="${((t1y+t2y)/2-4).toFixed(1)}" fill="#ff4444" font-size="9">GAP ${Math.abs(gap).toFixed(2)}mm</text>`;
+  } else {
+    h+=dotS(ts,T12,'#ffcc44',6,'T12 ✓',5,-5);
+  }
+  h+=dotS(ts,S1,TC('a2'),5,'S1',5,-4);h+=dotS(ts,E2,TC('a2'),5,'E2',-30,-4);
+  document.getElementById('vSv').innerHTML=h;
+}
+
+// ── AUTO R2 — busca binária (corrigida) ─────────────────────────────────────
+function autoR2(){
+  const gv=id=>document.getElementById(id).value,gf=id=>parseFloat(gv(id));
+  const S1=[gf('vs1d')/2,gf('vs1z')],E2=[gf('ve2d')/2,gf('ve2z')];
+  const R1=gf('vr1n'),G1=parseInt(gv('vg1')),G2v=parseInt(gv('vg2'));
+  const C1=ctrFS(S1,gv('vEn'),R1,G1);
+  const fI=r2=>{const C2=ctrFS(E2,gv('vEx'),r2,G2v);return Math.hypot(C2[0]-C1[0],C2[1]-C1[1])-(R1-r2);};
+  const fE=r2=>{const C2=ctrFS(E2,gv('vEx'),r2,G2v);return Math.hypot(C2[0]-C1[0],C2[1]-C1[1])-(R1+r2);};
+  let res=null;
+  // Tangência interna (d12 = R1-R2)
+  if(Math.sign(fI(0.2))!==Math.sign(fI(R1*0.92))){
+    let lo=0.2,hi=R1*0.92;
+    for(let i=0;i<64;i++){const m=(lo+hi)/2;if(fI(m)>0)hi=m;else lo=m;}
+    res=(lo+hi)/2;
+  }
+  // Tangência externa (d12 = R1+R2)
+  else if(Math.sign(fE(0.2))!==Math.sign(fE(120))){
+    let lo=0.2,hi=120;
+    for(let i=0;i<64;i++){const m=(lo+hi)/2;if(fE(m)>0)hi=m;else lo=m;}
+    res=(lo+hi)/2;
+  }
+  if(res&&res>0.1){r2S(res.toFixed(3));}
+  else{alert('Não encontrou R2. Verifique S1, E2 e tipos de superfície.');}
+}
+
+// ── AUTO R1 — busca binária (corrigida) ─────────────────────────────────────
+function autoR1(){
+  const gv=id=>document.getElementById(id).value,gf=id=>parseFloat(gv(id));
+  const S1=[gf('vs1d')/2,gf('vs1z')],E2=[gf('ve2d')/2,gf('ve2z')];
+  const R2=gf('vr2n'),G1=parseInt(gv('vg1')),G2v=parseInt(gv('vg2'));
+  const C2=ctrFS(E2,gv('vEx'),R2,G2v);
+  const fI=r1=>{const C1=ctrFS(S1,gv('vEn'),r1,G1);return Math.hypot(C2[0]-C1[0],C2[1]-C1[1])-(r1-R2);};
+  const fE=r1=>{const C1=ctrFS(S1,gv('vEn'),r1,G1);return Math.hypot(C2[0]-C1[0],C2[1]-C1[1])-(r1+R2);};
+  let res=null;
+  if(Math.sign(fI(R2+0.5))!==Math.sign(fI(300))){
+    let lo=R2+0.5,hi=300;
+    for(let i=0;i<64;i++){const m=(lo+hi)/2;if(fI(m)>0)hi=m;else lo=m;}
+    res=(lo+hi)/2;
+  }
+  else if(Math.sign(fE(0.5))!==Math.sign(fE(300))){
+    let lo=0.5,hi=300;
+    for(let i=0;i<64;i++){const m=(lo+hi)/2;if(fE(m)>0)hi=m;else lo=m;}
+    res=(lo+hi)/2;
+  }
+  if(res&&res>0.1){r1S(res.toFixed(3));}
+  else{alert('Não encontrou R1.');}
+}
+
+function aLdR(){const s=(i,v)=>document.getElementById(i).value=v;s('vs1d','111');s('vs1z','-19');s('vEn','face_neg');s('vg1','3');r1S('77');s('vg2','3');r2S('6');s('ve2d','71');s('ve2z','-12.106');s('vEx','diam_pos');}
+function aLdE(){const s=(i,v)=>document.getElementById(i).value=v;s('vs1d','111');s('vs1z','-14.5');s('vEn','face_neg');s('vg1','3');r1S('80');s('vg2','3');r2S('5.6');s('ve2d','76');s('ve2z','-10');s('vEx','diam_pos');}
+
+// ══════════════════════════════════ UTILS ══════════════════════════════════
+function cpEl(id){
+  const t=document.getElementById(id).textContent||document.getElementById(id).innerText||'';
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(()=>toast('Copiado')).catch(()=>fbCopy(id));}
+  else{fbCopy(id);}
+}
+function toast(msg){const el=document.getElementById('toast');if(!el)return;el.textContent=msg;el.classList.add('show');clearTimeout(window.__toastT);window.__toastT=setTimeout(()=>el.classList.remove('show'),1400);}
+function fbCopy(id){const el=document.getElementById(id);const r=document.createRange();r.selectNodeContents(el);const s=window.getSelection();s.removeAllRanges();s.addRange(r);document.execCommand('copy');s.removeAllRanges();toast('Copiado');}
+function dlEl(id,fname){const t=document.getElementById(id).textContent;const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/plain;charset=utf-8'}));a.download=fname;a.click();URL.revokeObjectURL(a.href);}
+
+
+// ══════════════════════════════════ PWA ══════════════════════════════════
+let deferredInstallPrompt=null;
+window.addEventListener('beforeinstallprompt',(e)=>{
+  e.preventDefault();
+  deferredInstallPrompt=e;
+  const btn=document.getElementById('installAppBtn');
+  if(btn)btn.classList.add('show');
+});
+window.addEventListener('appinstalled',()=>{
+  const btn=document.getElementById('installAppBtn');
+  if(btn)btn.classList.remove('show');
+  deferredInstallPrompt=null;
+  toast('App instalado');
+});
+function setupPWAInstall(){
+  const btn=document.getElementById('installAppBtn');
+  if(btn){
+    btn.addEventListener('click',async()=>{
+      if(!deferredInstallPrompt){
+        toast('Use “Adicionar à tela inicial”');
+        return;
+      }
+      deferredInstallPrompt.prompt();
+      await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt=null;
+      btn.classList.remove('show');
+    });
+  }
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+  }
+}
+
+// ══════════════════════════════════ INIT ══════════════════════════════════
+document.addEventListener('DOMContentLoaded',()=>{
+  setupPWAInstall();
+  // Restaurar tema salvo
+  try{const t=localStorage.getItem('cnc-t')||'lt';const ids={'':'th0',gr:'th1',lt:'th2'};setTheme(t,ids[t]||'th2');}catch(e){setTheme('','th0');}
+  // Init tabs
+  setM('A');tE();tX();
+  ldRotA();
+  pLdR();
+  aLdR();
+  aUpd();
+});
+</script>
+</body>
+</html>
