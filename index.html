@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>KSB CNC Perfil v2.3 PWA</title>
+<title>KSB CNC Perfil v2.4 Mobile</title>
 <style>
 /* ── CSS VARIABLES (temas) ─────────────────────────────── */
 :root {
@@ -169,6 +169,102 @@ body.t-lt .thm-btn:hover,body.t-lt .thm-btn.on{border-color:#07385f;box-shadow:0
   svg{min-height:240px}.msw{display:grid;grid-template-columns:1fr}.msw button{width:100%}
 }
 
+
+
+/* ── UX V2.4 — MOBILE-FIRST REAL / APP CNC ─────────────────────────────
+   Ajustes apenas visuais: mantém cálculos, SVG, G-code e PWA. */
+html{width:100%;overflow-x:hidden;background:var(--bg)}
+body{width:100%;max-width:100%;overflow-x:hidden;background:var(--bg);touch-action:manipulation}
+body,*{min-width:0}
+.hdr,.tabs,.panels,.panel,.card,.info,.msw,.gc,svg{max-width:100%}
+.hdr{width:100%;}
+.tabs{width:100%;scrollbar-width:thin}
+.panels{width:100%;}
+.card{overflow:hidden}
+.fr>*{max-width:100%}
+input[type=number],input[type=text],select{max-width:100%}
+select{white-space:normal;text-overflow:ellipsis}
+
+/* visual mais limpo no tema claro */
+body.t-lt{--bg:#eef4fb;--cbg:#ffffff;--bdr:#86a8c6;--txt:#06192b;--dim:#244d70;--inp:#f8fbff;--itxt:#06192b;--tb-bg:#e1ecf7;--tb-act:#ffffff;--shadow:0 8px 22px rgba(6,25,43,.10)}
+body.t-lt .card,body.t-lt .info,body.t-lt svg,body.t-lt .gc{box-shadow:0 8px 22px rgba(6,25,43,.10)}
+
+/* quebra de layout antes para tablets/celulares grandes */
+@media (max-width:1180px){
+  .g2{grid-template-columns:1fr!important;gap:12px!important;width:100%}
+  .panels{max-width:860px}
+}
+
+@media (max-width:720px){
+  html,body{font-size:14px}
+  .hdr{position:sticky;top:0;z-index:30;display:grid;grid-template-columns:auto 1fr auto;gap:8px;padding:8px 10px;border-bottom-width:1px}
+  .hdr>span{font-size:19px!important;line-height:1}
+  .hdr-t{font-size:12.5px;letter-spacing:.35px;line-height:1.15}
+  .hdr-s{font-size:8.5px;line-height:1.2;margin-top:1px}
+  .hdr [style*="margin-left:auto"]{margin-left:0!important;gap:4px!important;align-self:start}
+  .hdr [style*="Tema"]{display:none!important}
+  .thm-btn{width:20px;height:20px;border-radius:6px}
+
+  .tabs{top:45px;z-index:29;padding:6px;background:var(--tb-bg);gap:6px;border-bottom:1px solid var(--bdr)}
+  .tab{flex:0 0 auto;padding:8px 10px;border:1px solid var(--bdr);border-radius:999px;background:var(--cbg);font-size:10.5px;line-height:1;border-bottom-width:1px;color:var(--dim)}
+  .tab.on{background:var(--rb-hi-bg);border-color:var(--rb-hi-b);box-shadow:0 4px 12px rgba(0,0,0,.08)}
+
+  .panels{padding:10px 9px;width:100%;max-width:100%;margin:0}
+  .info{padding:10px 11px;border-radius:14px;font-size:12.5px;line-height:1.45;margin-bottom:10px}
+  .card{width:100%;padding:12px;margin-bottom:11px;border-radius:16px;border-width:1px;box-shadow:0 5px 18px rgba(0,0,0,.10)}
+  .ct{font-size:11px;margin-bottom:10px;letter-spacing:.55px}
+
+  /* campos: label em cima, input grande, padrão calculadora */
+  .fr{display:block;margin-bottom:11px}
+  .fl{display:block;min-width:0;margin-bottom:5px;font-size:11.5px;line-height:1.25;color:var(--txt);opacity:.88}
+  input[type=number],input[type=text],select{display:block;width:100%!important;min-width:0!important;min-height:44px;padding:10px 12px;border-radius:12px;font-size:18px;line-height:1.2;background:var(--inp);font-weight:850}
+  select{font-size:14px;padding-right:32px}
+  input[type=range]{width:100%}
+
+  /* seletor de modo */
+  .msw{display:grid;width:100%;grid-template-columns:1fr;margin-bottom:11px;border-radius:16px;box-shadow:0 5px 16px rgba(0,0,0,.08)}
+  .msw button{width:100%;padding:12px 10px;font-size:12px;text-align:center;border-bottom:1px solid var(--bdr)}
+  .msw button:last-child{border-bottom:0}
+
+  .btn-calc{min-height:48px;padding:13px 12px;border-radius:14px;font-size:14px;margin-top:10px}
+  .btn-sm,.btn-add,.btn-auto,.btn-cp{min-height:38px;border-radius:12px}
+
+  /* resultados mais legíveis */
+  .rb{padding:12px;border-radius:15px}
+  .rl{font-size:10px;margin-bottom:5px}
+  .rv{font-size:23px;line-height:1.1;letter-spacing:-.5px}
+  #aRes [style*="grid-template-columns:1fr 1fr 1fr"],
+  #bRes [style*="grid-template-columns:1fr 1fr 1fr"],
+  #vResD [style*="grid-template-columns:1fr 1fr 1fr"]{grid-template-columns:1fr!important;gap:8px!important}
+  #aRes [style*="grid-template-columns:1fr 1fr"],
+  #bRes [style*="grid-template-columns:1fr 1fr"],
+  #vResD [style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr!important;gap:8px!important}
+
+  /* tabelas e códigos não estouram a tela */
+  .pt,.mt{min-width:520px}
+  .card:has(.pt),.card:has(.mt){overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .gc{font-size:12.5px;line-height:1.65;max-height:250px;overflow:auto;border-radius:14px}
+  svg{min-height:250px;border-radius:14px}
+  .coords{font-size:11px;height:18px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+
+  .ftr{padding:12px 10px 76px;margin-top:8px;font-size:9.5px;line-height:1.5}
+  .ftr-actions{margin-bottom:9px}
+  .btn-improve{width:100%;max-width:310px;min-height:42px;border-radius:14px;font-size:13px}
+  .pwa-install{left:10px;right:10px;bottom:10px;justify-content:center;min-height:46px;border-radius:16px}
+}
+
+@media (max-width:420px){
+  .hdr{grid-template-columns:auto 1fr auto;padding:7px 8px}
+  .hdr-t{font-size:11.5px}.hdr-s{font-size:8px}
+  .thm-btn{width:18px;height:18px}
+  .tabs{top:42px;padding:5px}.tab{font-size:10px;padding:7px 9px}
+  .panels{padding:8px 7px}
+  .card{padding:11px 10px;border-radius:15px}
+  input[type=number],input[type=text],select{font-size:17px;min-height:43px}
+  select{font-size:13.5px}
+  .rv{font-size:21px}
+}
+
 </style>
 
 <!-- PWA / Instalar como app -->
@@ -188,7 +284,7 @@ body.t-lt .thm-btn:hover,body.t-lt .thm-btn.on{border-color:#07385f;box-shadow:0
   <span style="font-size:22px">⚙</span>
   <div>
     <div class="hdr-t">KSB BRASIL — CNC PERFIL</div>
-    <div class="hdr-s">Concordância · I/K Fanuc · Usinagem Jundiaí · v2.2</div>
+    <div class="hdr-s">Concordância · I/K Fanuc · Usinagem Jundiaí · v2.4</div>
   </div>
   <!-- TEMA -->
   <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
@@ -575,8 +671,8 @@ Desbaste: mesmos arcos com Z+0.5mm em todos pontos</div>
 <div class="ftr">
   <div class="ftr-actions">
     <a class="btn-improve" target="_blank" rel="noopener"
-       href="https://wa.me/5511999056897?text=Ol%C3%A1%20Rogerinho.%0AGostaria%20de%20sugerir%20uma%20melhoria%20no%20sistema%20CNC%20Perfil.">
-      ☕ Sugerir melhoria, clique aqui!
+       href="https://wa.me/5511999999999?text=Ol%C3%A1%20Rogerinho.%0AGostaria%20de%20sugerir%20uma%20melhoria%20no%20sistema%20CNC%20Perfil.">
+      ☕ Sugerir melhoria
     </a>
   </div>
   <div>✝️ Para a glória de Deus · Col 3:23 · KSB Brasil · Usinagem Jundiaí · &lt;/&gt; Rogerinho Ramos</div>
